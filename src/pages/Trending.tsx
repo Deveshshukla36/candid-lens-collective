@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { TrendingUp, Crown, Fire } from 'lucide-react';
+import { TrendingUp, Crown, Flame } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import PhotoCard from '@/components/PhotoCard';
 import { usePhotos } from '@/context/PhotoContext';
@@ -63,7 +63,7 @@ const Trending = () => {
         
         <div className="mb-6">
           <h2 className="font-rough text-2xl flex items-center gap-2 mb-4">
-            <Fire className="text-orange-500" size={24} />
+            <Flame className="text-orange-500" size={24} />
             <span>Hot Right Now</span>
           </h2>
         </div>
