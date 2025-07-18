@@ -27,10 +27,10 @@ const Index = () => {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
         <div className="text-center mb-12">
-          <h1 className="font-rough text-5xl md:text-7xl mb-6 text-white drop-shadow-lg">
+          <h1 className="font-rough text-3xl md:text-4xl mb-4 text-white drop-shadow-lg">
             Share Your Vision
           </h1>
-          <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto drop-shadow-lg">
+          <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto drop-shadow-lg">
             Upload and discover high-quality photography with detailed camera information
           </p>
         </div>
