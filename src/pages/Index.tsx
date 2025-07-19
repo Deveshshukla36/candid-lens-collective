@@ -1,14 +1,26 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePhotos } from '@/context/PhotoContext';
+import { useUser } from '@/context/UserContext';
 import PhotoCard from '@/components/PhotoCard';
 import UploadModal from '@/components/UploadModal';
+import UserSetup from '@/components/UserSetup';
 import { Button } from '@/components/ui/button';
-import { Upload, Calendar, Camera } from 'lucide-react';
+import { Upload, Calendar, Camera, Users, User, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const { photos } = usePhotos();
+  const { currentUser } = useUser();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isUserSetupOpen, setIsUserSetupOpen] = useState(false);
+
+  useEffect(() => {
+    // Show user setup if no username is set
+    if (!currentUser) {
+      setIsUserSetupOpen(true);
+    }
+  }, [currentUser]);
 
   const getDateRange = () => {
     if (photos.length === 0) return '';
@@ -31,39 +43,72 @@ const Index = () => {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="border-b border-gray-200 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              <h1 className="text-xl font-semibold text-gray-900">
+            <div className="flex items-center space-x-4 sm:space-x-6">
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
                 CANDID LENS
               </h1>
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
+              <div className="flex items-center space-x-2 sm:space-x-4 text-sm text-gray-600">
                 <div className="flex items-center space-x-1">
                   <Camera className="w-4 h-4" />
-                  <span>{photos.length} Photos</span>
+                  <span className="hidden sm:inline">{photos.length} Photos</span>
+                  <span className="sm:hidden">{photos.length}</span>
                 </div>
                 {photos.length > 0 && (
-                  <div className="flex items-center space-x-1">
+                  <div className="hidden sm:flex items-center space-x-1">
                     <Calendar className="w-4 h-4" />
                     <span>{getDateRange()}</span>
                   </div>
                 )}
               </div>
             </div>
-            <Button 
-              onClick={() => setIsUploadOpen(true)}
-              size="sm"
-              className="bg-black hover:bg-gray-800 text-white"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Upload
-            </Button>
+            
+            <div className="flex items-center space-x-2">
+              {/* Navigation Icons */}
+              <Link to="/trending">
+                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="hidden sm:ml-2 sm:inline">Trending</span>
+                </Button>
+              </Link>
+              
+              <Link to="/groups">
+                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+                  <Users className="w-4 h-4" />
+                  <span className="hidden sm:ml-2 sm:inline">Groups</span>
+                </Button>
+              </Link>
+              
+              <Link to="/profile">
+                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:ml-2 sm:inline">Profile</span>
+                </Button>
+              </Link>
+              
+              <Button 
+                onClick={() => setIsUploadOpen(true)}
+                size="sm"
+                className="bg-black hover:bg-gray-800 text-white"
+              >
+                <Upload className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Upload</span>
+              </Button>
+            </div>
           </div>
+          
+          {/* Welcome message for mobile */}
+          {currentUser && (
+            <div className="mt-2 text-sm text-gray-600 sm:hidden">
+              Welcome, {currentUser.username}
+            </div>
+          )}
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {photos.length === 0 ? (
           <div className="text-center py-20">
             <Camera className="w-16 h-16 mx-auto text-gray-300 mb-4" />
@@ -77,7 +122,7 @@ const Index = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
             {photos.map(photo => (
               <PhotoCard key={photo.id} photo={photo} />
             ))}
@@ -88,6 +133,11 @@ const Index = () => {
       <UploadModal 
         isOpen={isUploadOpen} 
         onClose={() => setIsUploadOpen(false)} 
+      />
+      
+      <UserSetup 
+        isOpen={isUserSetupOpen} 
+        onClose={() => setIsUserSetupOpen(false)} 
       />
     </div>
   );
