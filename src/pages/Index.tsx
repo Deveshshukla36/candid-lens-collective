@@ -1,52 +1,89 @@
 
 import { useState } from 'react';
-import Navigation from '@/components/Navigation';
+import { usePhotos } from '@/context/PhotoContext';
 import PhotoCard from '@/components/PhotoCard';
 import UploadModal from '@/components/UploadModal';
-import { usePhotos } from '@/context/PhotoContext';
-import fujiSky from '@/assets/fuji-sky.jpg';
+import { Button } from '@/components/ui/button';
+import { Upload, Calendar, Camera } from 'lucide-react';
 
 const Index = () => {
   const { photos } = usePhotos();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
+  const getDateRange = () => {
+    if (photos.length === 0) return '';
+    const dates = photos.map(p => new Date(p.uploadDate));
+    const earliest = new Date(Math.min(...dates.map(d => d.getTime())));
+    const latest = new Date(Math.max(...dates.map(d => d.getTime())));
+    
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('en-US', { 
+        day: '2-digit', 
+        month: 'short', 
+        year: 'numeric' 
+      });
+    };
+    
+    return `${formatDate(latest)} – ${formatDate(earliest)}`;
+  };
+
   return (
-    <div className="min-h-screen relative">
-      {/* Scrolling Sky Background */}
-      <div 
-        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url(${fujiSky})`,
-          backgroundAttachment: 'fixed'
-        }}
-      >
-        <div className="absolute inset-0 bg-blue-900/40"></div>
-      </div>
-      
-      <Navigation onUploadClick={() => setIsUploadOpen(true)} />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
-        <div className="text-center mb-12">
-          <h1 className="font-rough text-3xl md:text-4xl mb-4 text-white drop-shadow-lg">
-            Share Your Vision
-          </h1>
-          <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto drop-shadow-lg">
-            Upload and discover high-quality photography with detailed camera information
-          </p>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="border-b border-gray-200 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              <h1 className="text-xl font-semibold text-gray-900">
+                CANDID LENS
+              </h1>
+              <div className="flex items-center space-x-4 text-sm text-gray-600">
+                <div className="flex items-center space-x-1">
+                  <Camera className="w-4 h-4" />
+                  <span>{photos.length} Photos</span>
+                </div>
+                {photos.length > 0 && (
+                  <div className="flex items-center space-x-1">
+                    <Calendar className="w-4 h-4" />
+                    <span>{getDateRange()}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <Button 
+              onClick={() => setIsUploadOpen(true)}
+              size="sm"
+              className="bg-black hover:bg-gray-800 text-white"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Upload
+            </Button>
+          </div>
         </div>
-        
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-6 py-8">
         {photos.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-blue-100 text-lg">No photos found. Upload your first photo!</p>
+          <div className="text-center py-20">
+            <Camera className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+            <p className="text-gray-500 text-lg mb-6">No photos uploaded yet</p>
+            <Button 
+              onClick={() => setIsUploadOpen(true)}
+              className="bg-black hover:bg-gray-800 text-white"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Upload your first photo
+            </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-16">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
             {photos.map(photo => (
               <PhotoCard key={photo.id} photo={photo} />
             ))}
           </div>
         )}
-      </div>
+      </main>
       
       <UploadModal 
         isOpen={isUploadOpen} 
