@@ -14,6 +14,8 @@ export interface PhotoData {
   isLiked: boolean;
   uploadedBy: string;
   uploadDate: string;
+  isGlobal?: boolean;
+  groupId?: string;
 }
 
 interface PhotoContextType {
@@ -22,6 +24,10 @@ interface PhotoContextType {
   toggleLike: (id: string) => void;
   deletePhoto: (id: string) => void;
   updatePhoto: (id: string, updates: Partial<PhotoData>) => void;
+  getGlobalPhotos: () => PhotoData[];
+  getTrendingPhotos: () => PhotoData[];
+  getUserPhotos: (username: string) => PhotoData[];
+  getGroupPhotos: (groupId: string) => PhotoData[];
 }
 
 const PhotoContext = createContext<PhotoContextType | undefined>(undefined);
@@ -48,7 +54,8 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       likes: 24,
       isLiked: false,
       uploadedBy: 'photographer_one',
-      uploadDate: '2024-01-15'
+      uploadDate: '2024-01-15',
+      isGlobal: true
     },
     {
       id: '2',
@@ -62,7 +69,8 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       likes: 18,
       isLiked: false,
       uploadedBy: 'tech_lover',
-      uploadDate: '2024-01-14'
+      uploadDate: '2024-01-14',
+      isGlobal: true
     },
     {
       id: '3',
@@ -76,7 +84,8 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       likes: 42,
       isLiked: false,
       uploadedBy: 'astro_photographer',
-      uploadDate: '2024-01-13'
+      uploadDate: '2024-01-13',
+      isGlobal: true
     },
     {
       id: '4',
@@ -90,7 +99,8 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       likes: 36,
       isLiked: false,
       uploadedBy: 'mountain_climber',
-      uploadDate: '2024-01-12'
+      uploadDate: '2024-01-12',
+      isGlobal: true
     },
     {
       id: '5',
@@ -104,7 +114,8 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       likes: 28,
       isLiked: false,
       uploadedBy: 'nature_lover',
-      uploadDate: '2024-01-11'
+      uploadDate: '2024-01-11',
+      isGlobal: true
     },
     {
       id: '6',
@@ -118,7 +129,8 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       likes: 31,
       isLiked: false,
       uploadedBy: 'fuji_enthusiast',
-      uploadDate: '2024-01-10'
+      uploadDate: '2024-01-10',
+      isGlobal: true
     },
     {
       id: '7',
@@ -132,7 +144,8 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       likes: 45,
       isLiked: false,
       uploadedBy: 'sunset_chaser',
-      uploadDate: '2024-01-09'
+      uploadDate: '2024-01-09',
+      isGlobal: true
     },
     {
       id: '8',
@@ -146,7 +159,8 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       likes: 52,
       isLiked: false,
       uploadedBy: 'film_aesthetic',
-      uploadDate: '2024-01-08'
+      uploadDate: '2024-01-08',
+      isGlobal: true
     }
   ]);
 
@@ -156,7 +170,8 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       id: Date.now().toString(),
       likes: 0,
       isLiked: false,
-      uploadDate: new Date().toISOString().split('T')[0]
+      uploadDate: new Date().toISOString().split('T')[0],
+      isGlobal: photoData.isGlobal ?? true
     };
     setPhotos(prev => [newPhoto, ...prev]);
   };
@@ -183,8 +198,36 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     ));
   };
 
+  const getGlobalPhotos = () => {
+    return photos.filter(photo => photo.isGlobal);
+  };
+
+  const getTrendingPhotos = () => {
+    return photos
+      .filter(photo => photo.isGlobal)
+      .sort((a, b) => b.likes - a.likes);
+  };
+
+  const getUserPhotos = (username: string) => {
+    return photos.filter(photo => photo.uploadedBy === username);
+  };
+
+  const getGroupPhotos = (groupId: string) => {
+    return photos.filter(photo => photo.groupId === groupId);
+  };
+
   return (
-    <PhotoContext.Provider value={{ photos, addPhoto, toggleLike, deletePhoto, updatePhoto }}>
+    <PhotoContext.Provider value={{ 
+      photos, 
+      addPhoto, 
+      toggleLike, 
+      deletePhoto, 
+      updatePhoto,
+      getGlobalPhotos,
+      getTrendingPhotos,
+      getUserPhotos,
+      getGroupPhotos
+    }}>
       {children}
     </PhotoContext.Provider>
   );

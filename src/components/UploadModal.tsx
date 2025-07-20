@@ -1,9 +1,13 @@
-import { useState, useRef } from 'react';
-import { X, Upload, Camera, Image as ImageIcon } from 'lucide-react';
+import { useState } from 'react';
 import { usePhotos } from '@/context/PhotoContext';
+import { useUser } from '@/context/UserContext';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Upload, Camera, Globe, Users } from 'lucide-react';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -11,278 +15,192 @@ interface UploadModalProps {
 }
 
 const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
-  const { addPhoto } = usePhotos();
-  const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [title, setTitle] = useState('');
+  const [camera, setCamera] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadType, setUploadType] = useState<'global' | 'group'>('global');
+  const [selectedGroup, setSelectedGroup] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [formData, setFormData] = useState({
-    url: '',
-    title: '',
-    camera: '',
-    pixels: '',
-    frameSize: '',
-    format: '',
-    filter: ''
-  });
+  
+  const { addPhoto } = usePhotos();
+  const { currentUser, groups } = useUser();
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        const url = URL.createObjectURL(file);
-        setFormData(prev => ({ 
-          ...prev, 
-          url,
-          format: file.type.split('/')[1].toUpperCase(),
-          title: file.name.replace(/\.[^/.]+$/, "")
-        }));
-      } else {
-        toast({
-          title: "Invalid file type",
-          description: "Please select an image file",
-          variant: "destructive"
-        });
-      }
+    if (file && file.type.startsWith('image/')) {
+      setImageFile(file);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.url || !formData.title) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in the required fields",
-        variant: "destructive"
-      });
+    if (!currentUser) {
+      alert('Please log in to upload photos');
+      return;
+    }
+    
+    if (!imageFile || !title.trim() || !camera.trim()) {
+      alert('Please fill in all required fields and select an image');
+      return;
+    }
+
+    if (uploadType === 'group' && !selectedGroup) {
+      alert('Please select a group for group upload');
       return;
     }
 
     setIsUploading(true);
-    
-    try {
-      addPhoto({
-        url: formData.url,
-        title: formData.title,
-        camera: formData.camera || 'Unknown',
-        pixels: formData.pixels || 'Unknown',
-        frameSize: formData.frameSize || 'Unknown',
-        format: formData.format || 'JPEG',
-        filter: formData.filter || 'None',
-        uploadedBy: 'Current User'
-      });
 
-      // Reset form
-      setFormData({
-        url: '',
-        title: '',
-        camera: '',
-        pixels: '',
-        frameSize: '',
-        format: '',
-        filter: ''
-      });
+    try {
+      // Create object URL for the image
+      const imageUrl = URL.createObjectURL(imageFile);
       
-      toast({
-        title: "Success!",
-        description: "Your photo has been uploaded successfully",
-      });
+      const photoData = {
+        url: imageUrl,
+        title: title.trim(),
+        camera: camera.trim(),
+        pixels: '6000x4000', // Default values
+        frameSize: '24.2 MP',
+        format: 'JPEG',
+        filter: 'Natural',
+        uploadedBy: currentUser.username,
+        isGlobal: uploadType === 'global',
+        groupId: uploadType === 'group' ? selectedGroup : undefined
+      };
+
+      addPhoto(photoData);
+      
+      // Reset form
+      setTitle('');
+      setCamera('');
+      setImageFile(null);
+      setUploadType('global');
+      setSelectedGroup('');
       
       onClose();
     } catch (error) {
-      toast({
-        title: "Upload failed",
-        description: "There was an error uploading your photo",
-        variant: "destructive"
-      });
+      console.error('Upload failed:', error);
+      alert('Upload failed. Please try again.');
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.id]: e.target.value
-    }));
-  };
-
-  if (!isOpen) return null;
+  const userGroups = groups.filter(group => 
+    group.members.includes(currentUser?.username || '')
+  );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-500/10 to-white">
-          <h2 className="text-xl font-semibold flex items-center gap-2 text-blue-900">
-            <Upload className="text-blue-500" size={24} />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Upload className="w-5 h-5" />
             Upload Photo
-          </h2>
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-blue-700 hover:bg-blue-100">
-            <X size={20} />
-          </Button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-120px)]">
-          {/* File Upload Section */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-blue-900">Upload Image File</label>
-            <div className="flex gap-2">
-              <Input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <Button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                className="flex-1 border-blue-200 text-blue-700 hover:bg-blue-50"
-              >
-                <ImageIcon size={16} className="mr-2" />
-                Choose Image
-              </Button>
-            </div>
-            {formData.url && (
-              <div className="mt-2">
-                <img 
-                  src={formData.url} 
-                  alt="Preview" 
-                  className="w-full h-32 object-cover rounded-lg border border-blue-200"
-                />
-              </div>
-            )}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="uploadType">Upload Type</Label>
+            <Select value={uploadType} onValueChange={(value: 'global' | 'group') => setUploadType(value)}>
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="global">
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    Global (Public)
+                  </div>
+                </SelectItem>
+                <SelectItem value="group">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Group
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          
-          <div className="text-center text-blue-600 text-sm">OR</div>
 
-          <div className="space-y-2">
-            <label htmlFor="url" className="text-sm font-medium text-blue-900">
-              Photo URL *
-            </label>
+          {uploadType === 'group' && (
+            <div>
+              <Label htmlFor="group">Select Group</Label>
+              <Select value={selectedGroup} onValueChange={setSelectedGroup}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose a group..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {userGroups.map(group => (
+                    <SelectItem key={group.id} value={group.id}>
+                      {group.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          
+          <div>
+            <Label htmlFor="image">Photo *</Label>
             <Input
-              id="url"
-              type="url"
-              placeholder="https://example.com/photo.jpg"
-              value={formData.url}
-              onChange={handleChange}
+              id="image"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="mt-1"
               required
-              className="w-full border-blue-200 focus:border-blue-400 focus:ring-blue-400"
             />
           </div>
-
-          <div className="space-y-2">
-            <label htmlFor="title" className="text-sm font-medium text-blue-900">
-              Title *
-            </label>
+          
+          <div>
+            <Label htmlFor="title">Title *</Label>
             <Input
               id="title"
               type="text"
-              placeholder="Beautiful sunset landscape"
-              value={formData.title}
-              onChange={handleChange}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter photo title..."
+              className="mt-1"
               required
-              className="w-full border-blue-200 focus:border-blue-400 focus:ring-blue-400"
             />
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="camera" className="text-sm font-medium text-blue-900">
-                Camera
-              </label>
-              <Input
-                id="camera"
-                type="text"
-                placeholder="Canon EOS R5"
-                value={formData.camera}
-                onChange={handleChange}
-                className="w-full border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label htmlFor="pixels" className="text-sm font-medium text-blue-900">
-                Resolution
-              </label>
-              <Input
-                id="pixels"
-                type="text"
-                placeholder="4000x3000"
-                value={formData.pixels}
-                onChange={handleChange}
-                className="w-full border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="frameSize" className="text-sm font-medium text-blue-900">
-                Frame Size
-              </label>
-              <Input
-                id="frameSize"
-                type="text"
-                placeholder="Full Frame"
-                value={formData.frameSize}
-                onChange={handleChange}
-                className="w-full border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label htmlFor="format" className="text-sm font-medium text-blue-900">
-                Format
-              </label>
-              <Input
-                id="format"
-                type="text"
-                placeholder="RAW, JPEG"
-                value={formData.format}
-                onChange={handleChange}
-                className="w-full border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="filter" className="text-sm font-medium text-blue-900">
-              Filter/Style
-            </label>
+          
+          <div>
+            <Label htmlFor="camera">Camera *</Label>
             <Input
-              id="filter"
+              id="camera"
               type="text"
-              placeholder="Vintage, HDR, etc."
-              value={formData.filter}
-              onChange={handleChange}
-              className="w-full border-blue-200 focus:border-blue-400 focus:ring-blue-400"
+              value={camera}
+              onChange={(e) => setCamera(e.target.value)}
+              placeholder="e.g., Canon EOS R5"
+              className="mt-1"
+              required
             />
           </div>
-
-          <div className="flex gap-3 pt-4">
+          
+          <div className="flex gap-2 pt-4">
             <Button 
               type="button" 
               variant="outline" 
-              onClick={onClose} 
-              className="flex-1 border-blue-200 text-blue-700 hover:bg-blue-50"
+              onClick={onClose}
+              className="flex-1"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={isUploading}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white disabled:opacity-50"
+              className="flex-1 bg-black hover:bg-gray-800 text-white"
             >
-              <Upload size={16} className="mr-2" />
               {isUploading ? 'Uploading...' : 'Upload Photo'}
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

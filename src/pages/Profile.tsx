@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { usePhotos } from '@/context/PhotoContext';
+import { useUser } from '@/context/UserContext';
 import PhotoCard from '@/components/PhotoCard';
 import UploadModal from '@/components/UploadModal';
 import { Button } from '@/components/ui/button';
-import { Upload, Calendar, Camera, Heart, ArrowLeft } from 'lucide-react';
+import { Upload, Calendar, Camera, ArrowLeft, User, Settings, Moon, Sun, Share, CheckCircle, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Profile = () => {
-  const { photos } = usePhotos();
+  const { getUserPhotos } = usePhotos();
+  const { currentUser, toggleDarkMode } = useUser();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
-
-  // In a real app, this would be filtered by the current user's uploads
-  const userPhotos = photos; // For now, showing all photos as user's photos
+  
+  // Get user photos
+  const userPhotos = currentUser ? getUserPhotos(currentUser.username) : [];
   
   const totalLikes = userPhotos.reduce((sum, photo) => sum + photo.likes, 0);
   
@@ -65,20 +67,73 @@ const Profile = () => {
                 )}
               </div>
             </div>
-            <Button 
-              onClick={() => setIsUploadOpen(true)}
-              size="sm"
-              className="bg-black hover:bg-gray-800 text-white"
-            >
-              <Upload className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Upload</span>
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button 
+                onClick={toggleDarkMode}
+                variant="ghost"
+                size="sm"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                {currentUser?.isDarkMode ? (
+                  <Sun className="w-4 h-4" />
+                ) : (
+                  <Moon className="w-4 h-4" />
+                )}
+                <span className="hidden sm:ml-2 sm:inline">
+                  {currentUser?.isDarkMode ? 'Light' : 'Dark'}
+                </span>
+              </Button>
+              
+              <Button 
+                variant="ghost"
+                size="sm"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <Share className="w-4 h-4" />
+                <span className="hidden sm:ml-2 sm:inline">Share</span>
+              </Button>
+              
+              <Button 
+                onClick={() => setIsUploadOpen(true)}
+                size="sm"
+                className="bg-black hover:bg-gray-800 text-white"
+              >
+                <Upload className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Upload</span>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        {/* User Info */}
+        {currentUser && (
+          <div className="mb-6 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-200 rounded-full mb-3">
+              <User className="w-8 h-8 text-gray-600" />
+            </div>
+            <div className="flex items-center justify-center space-x-2 mb-1">
+              <h2 className="text-xl font-semibold text-gray-900">
+                @{currentUser.username}
+              </h2>
+              {currentUser.username === 'Devesh' && (
+                <CheckCircle className="w-5 h-5 text-gray-400" />
+              )}
+            </div>
+            <p className="text-gray-600 text-sm">
+              {currentUser.username === 'Devesh' && (
+                <span className="text-blue-600 font-medium">Admin • </span>
+              )}
+              Joined {new Date(currentUser.joinedDate).toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: 'numeric' 
+              })}
+            </p>
+          </div>
+        )}
+
         {userPhotos.length === 0 ? (
           <div className="text-center py-20">
             <Camera className="w-16 h-16 mx-auto text-gray-300 mb-4" />
@@ -95,7 +150,7 @@ const Profile = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
             {userPhotos.map(photo => (
-              <PhotoCard key={photo.id} photo={photo} />
+              <PhotoCard key={photo.id} photo={photo} showUserInfo={false} />
             ))}
           </div>
         )}

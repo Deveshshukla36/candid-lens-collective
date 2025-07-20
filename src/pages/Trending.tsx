@@ -8,11 +8,11 @@ import { Upload, Calendar, Camera, TrendingUp, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Trending = () => {
-  const { photos } = usePhotos();
+  const { getTrendingPhotos } = usePhotos();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   
-  // Sort photos by likes to get trending photos
-  const trendingPhotos = [...photos].sort((a, b) => b.likes - a.likes);
+  // Get trending photos (global photos sorted by likes)
+  const trendingPhotos = getTrendingPhotos();
   
   const getDateRange = () => {
     if (trendingPhotos.length === 0) return '';
@@ -91,7 +91,7 @@ const Trending = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
             {trendingPhotos.map(photo => (
-              <PhotoCard key={photo.id} photo={photo} />
+              <PhotoCard key={photo.id} photo={photo} showUserInfo={true} />
             ))}
           </div>
         )}

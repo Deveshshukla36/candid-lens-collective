@@ -2,8 +2,11 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
   username: string;
+  password: string;
   joinedDate: string;
   avatar?: string;
+  isAdmin?: boolean;
+  isDarkMode?: boolean;
 }
 
 interface Group {
@@ -14,16 +17,26 @@ interface Group {
   createdBy: string;
   createdDate: string;
   photos: string[]; // Photo IDs
+  isPrivate: boolean;
+  isLocked: boolean;
+  memberLimit?: number;
 }
 
 interface UserContextType {
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
   groups: Group[];
-  createGroup: (name: string, description: string) => void;
+  createGroup: (name: string, description: string, isPrivate?: boolean, memberLimit?: number) => void;
   joinGroup: (groupId: string) => void;
   leaveGroup: (groupId: string) => void;
   isUsernameAvailable: (username: string) => boolean;
+  toggleDarkMode: () => void;
+  searchUsers: (query: string) => string[];
+  addMemberToGroup: (groupId: string, username: string) => void;
+  removeMemberFromGroup: (groupId: string, username: string) => void;
+  toggleGroupLock: (groupId: string) => void;
+  deleteGroup: (groupId: string) => void;
+  login: (username: string, password: string) => boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -38,7 +51,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const savedGroups = localStorage.getItem('candid-lens-groups');
     
     if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
+      const user = JSON.parse(savedUser);
+      setCurrentUser(user);
+      // Apply dark mode if user preference is saved
+      if (user.isDarkMode) {
+        document.documentElement.classList.add('dark');
+      }
     }
     
     if (savedGroups) {
@@ -53,7 +71,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           members: [],
           createdBy: 'system',
           createdDate: new Date().toISOString(),
-          photos: []
+          photos: [],
+          isPrivate: false,
+          isLocked: false
         },
         {
           id: 'portrait',
@@ -62,7 +82,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           members: [],
           createdBy: 'system',
           createdDate: new Date().toISOString(),
-          photos: []
+          photos: [],
+          isPrivate: false,
+          isLocked: false
         },
         {
           id: 'street',
@@ -71,7 +93,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           members: [],
           createdBy: 'system',
           createdDate: new Date().toISOString(),
-          photos: []
+          photos: [],
+          isPrivate: false,
+          isLocked: false
         }
       ];
       setGroups(defaultGroups);
@@ -98,7 +122,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return !existingUsers.includes(username.toLowerCase());
   };
 
-  const createGroup = (name: string, description: string) => {
+  const createGroup = (name: string, description: string, isPrivate = false, memberLimit?: number) => {
     if (!currentUser) return;
     
     const newGroup: Group = {
@@ -108,7 +132,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       members: [currentUser.username],
       createdBy: currentUser.username,
       createdDate: new Date().toISOString(),
-      photos: []
+      photos: [],
+      isPrivate,
+      isLocked: false,
+      memberLimit
     };
     
     setGroups(prev => [...prev, newGroup]);
@@ -134,6 +161,82 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ));
   };
 
+  const toggleDarkMode = () => {
+    if (!currentUser) return;
+    
+    const updatedUser = { ...currentUser, isDarkMode: !currentUser.isDarkMode };
+    setCurrentUser(updatedUser);
+    
+    if (updatedUser.isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  const searchUsers = (query: string): string[] => {
+    const allUsers = JSON.parse(localStorage.getItem('candid-lens-all-users') || '[]');
+    return allUsers.filter((username: string) => 
+      username.toLowerCase().includes(query.toLowerCase())
+    );
+  };
+
+  const addMemberToGroup = (groupId: string, username: string) => {
+    if (!currentUser) return;
+    
+    setGroups(prev => prev.map(group => {
+      if (group.id === groupId && 
+          (group.createdBy === currentUser.username || currentUser.isAdmin) &&
+          !group.members.includes(username) &&
+          (!group.memberLimit || group.members.length < group.memberLimit)) {
+        return { ...group, members: [...group.members, username] };
+      }
+      return group;
+    }));
+  };
+
+  const removeMemberFromGroup = (groupId: string, username: string) => {
+    if (!currentUser) return;
+    
+    setGroups(prev => prev.map(group => {
+      if (group.id === groupId && 
+          (group.createdBy === currentUser.username || currentUser.isAdmin)) {
+        return { ...group, members: group.members.filter(member => member !== username) };
+      }
+      return group;
+    }));
+  };
+
+  const toggleGroupLock = (groupId: string) => {
+    if (!currentUser) return;
+    
+    setGroups(prev => prev.map(group => {
+      if (group.id === groupId && 
+          (group.createdBy === currentUser.username || currentUser.isAdmin)) {
+        return { ...group, isLocked: !group.isLocked };
+      }
+      return group;
+    }));
+  };
+
+  const deleteGroup = (groupId: string) => {
+    if (!currentUser || !currentUser.isAdmin) return;
+    setGroups(prev => prev.filter(group => group.id !== groupId));
+  };
+
+  const login = (username: string, password: string): boolean => {
+    const savedUsers = JSON.parse(localStorage.getItem('candid-lens-all-users') || '[]');
+    const userData = savedUsers.find((user: User) => 
+      user.username === username && user.password === password
+    );
+    
+    if (userData) {
+      setCurrentUser(userData);
+      return true;
+    }
+    return false;
+  };
+
   return (
     <UserContext.Provider value={{
       currentUser,
@@ -142,7 +245,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       createGroup,
       joinGroup,
       leaveGroup,
-      isUsernameAvailable
+      isUsernameAvailable,
+      toggleDarkMode,
+      searchUsers,
+      addMemberToGroup,
+      removeMemberFromGroup,
+      toggleGroupLock,
+      deleteGroup,
+      login
     }}>
       {children}
     </UserContext.Provider>

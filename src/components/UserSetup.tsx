@@ -43,10 +43,14 @@ const UserSetup = ({ isOpen, onClose }: UserSetupProps) => {
       existingUsers.push(username.toLowerCase());
       localStorage.setItem('candid-lens-users', JSON.stringify(existingUsers));
       
-      setCurrentUser({
+      const newUser = {
         username,
-        joinedDate: new Date().toISOString()
-      });
+        password: 'default123', // Default password for now
+        joinedDate: new Date().toISOString(),
+        isAdmin: username === 'Devesh',
+        isDarkMode: false
+      };
+      setCurrentUser(newUser);
       onClose();
     }
   };

@@ -10,8 +10,9 @@ import { Upload, Calendar, Camera, Users, User, TrendingUp } from 'lucide-react'
 import { Link } from 'react-router-dom';
 
 const Index = () => {
-  const { photos } = usePhotos();
+  const { getGlobalPhotos } = usePhotos();
   const { currentUser } = useUser();
+  const globalPhotos = getGlobalPhotos();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isUserSetupOpen, setIsUserSetupOpen] = useState(false);
 
@@ -23,8 +24,8 @@ const Index = () => {
   }, [currentUser]);
 
   const getDateRange = () => {
-    if (photos.length === 0) return '';
-    const dates = photos.map(p => new Date(p.uploadDate));
+    if (globalPhotos.length === 0) return '';
+    const dates = globalPhotos.map(p => new Date(p.uploadDate));
     const earliest = new Date(Math.min(...dates.map(d => d.getTime())));
     const latest = new Date(Math.max(...dates.map(d => d.getTime())));
     
@@ -52,10 +53,10 @@ const Index = () => {
               <div className="flex items-center space-x-2 sm:space-x-4 text-sm text-gray-600">
                 <div className="flex items-center space-x-1">
                   <Camera className="w-4 h-4" />
-                  <span className="hidden sm:inline">{photos.length} Photos</span>
-                  <span className="sm:hidden">{photos.length}</span>
+                  <span className="hidden sm:inline">{globalPhotos.length} Photos</span>
+                  <span className="sm:hidden">{globalPhotos.length}</span>
                 </div>
-                {photos.length > 0 && (
+                {globalPhotos.length > 0 && (
                   <div className="hidden sm:flex items-center space-x-1">
                     <Calendar className="w-4 h-4" />
                     <span>{getDateRange()}</span>
@@ -109,10 +110,10 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        {photos.length === 0 ? (
+        {globalPhotos.length === 0 ? (
           <div className="text-center py-20">
             <Camera className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-            <p className="text-gray-500 text-lg mb-6">No photos uploaded yet</p>
+            <p className="text-gray-500 text-lg mb-6">No global photos uploaded yet</p>
             <Button 
               onClick={() => setIsUploadOpen(true)}
               className="bg-black hover:bg-gray-800 text-white"
@@ -123,8 +124,8 @@ const Index = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
-            {photos.map(photo => (
-              <PhotoCard key={photo.id} photo={photo} />
+            {globalPhotos.map(photo => (
+              <PhotoCard key={photo.id} photo={photo} showUserInfo={true} />
             ))}
           </div>
         )}
