@@ -18,8 +18,9 @@ const Index = () => {
   const [isUserSetupOpen, setIsUserSetupOpen] = useState(false);
 
   useEffect(() => {
-    // Show user setup if no username is set
-    if (!currentUser) {
+    // Check if user exists in localStorage, if not show setup
+    const savedUser = localStorage.getItem('candid-lens-user');
+    if (!savedUser && !currentUser) {
       setIsUserSetupOpen(true);
     }
   }, [currentUser]);
@@ -67,28 +68,6 @@ const Index = () => {
             </div>
             
             <div className="flex items-center space-x-2">
-              {/* Navigation Icons */}
-              <Link to="/trending">
-                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="hidden sm:ml-2 sm:inline">Trending</span>
-                </Button>
-              </Link>
-              
-              <Link to="/groups">
-                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
-                  <Users className="w-4 h-4" />
-                  <span className="hidden sm:ml-2 sm:inline">Groups</span>
-                </Button>
-              </Link>
-              
-              <Link to="/profile">
-                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:ml-2 sm:inline">Profile</span>
-                </Button>
-              </Link>
-              
               <Button 
                 onClick={() => setIsUploadOpen(true)}
                 size="sm"

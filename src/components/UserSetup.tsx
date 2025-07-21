@@ -12,7 +12,7 @@ interface UserSetupProps {
 }
 
 const UserSetup = ({ isOpen, onClose }: UserSetupProps) => {
-  const { setCurrentUser, isUsernameAvailable } = useUser();
+  const { currentUser, setCurrentUser, isUsernameAvailable } = useUser();
   const [username, setUsername] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
@@ -62,7 +62,7 @@ const UserSetup = ({ isOpen, onClose }: UserSetupProps) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen && !currentUser} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">

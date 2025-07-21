@@ -61,10 +61,6 @@
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', sans-serif;
     position: relative;
-    background-image: url('src/assets/fuji-sky.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
   }
 
   body::before {
@@ -78,13 +74,13 @@
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    opacity: 0.05;
+    opacity: 0.15;
     z-index: -1;
     pointer-events: none;
   }
 
   .dark body::before {
-    opacity: 0.02;
+    opacity: 0.08;
   }
 
   .font-rough {
