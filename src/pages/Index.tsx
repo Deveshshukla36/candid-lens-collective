@@ -8,6 +8,7 @@ import UserSetup from '@/components/UserSetup';
 import { Button } from '@/components/ui/button';
 import { Upload, Calendar, Camera, Users, User, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Navigation from '@/components/Navigation';
 
 const Index = () => {
   const { getGlobalPhotos } = usePhotos();
@@ -140,6 +141,8 @@ const Index = () => {
         isOpen={isUserSetupOpen} 
         onClose={() => setIsUserSetupOpen(false)} 
       />
+      
+      <Navigation />
     </div>
   );
 };

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Upload, Calendar, Camera, Users, Plus, ArrowLeft, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Navigation from '@/components/Navigation';
 
 const Groups = () => {
   const { currentUser, groups, createGroup, joinGroup, leaveGroup } = useUser();
@@ -276,6 +277,8 @@ const Groups = () => {
           </div>
         </DialogContent>
       </Dialog>
+      
+      <Navigation />
     </div>
   );
 };

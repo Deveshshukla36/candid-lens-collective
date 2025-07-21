@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useUser } from '@/context/UserContext';
-import { User, Check, X } from 'lucide-react';
+import type { User } from '@/context/UserContext';
+import { User as UserIcon, Check, X } from 'lucide-react';
 
 interface UserSetupProps {
   isOpen: boolean;
@@ -43,14 +44,19 @@ const UserSetup = ({ isOpen, onClose }: UserSetupProps) => {
       existingUsers.push(username.toLowerCase());
       localStorage.setItem('candid-lens-users', JSON.stringify(existingUsers));
       
-      const newUser = {
+      const userData: User = {
         username,
         password: 'default123', // Default password for now
         joinedDate: new Date().toISOString(),
         isAdmin: username === 'Devesh',
         isDarkMode: false
       };
-      setCurrentUser(newUser);
+      
+      // Save user to all users list
+      const allUsers = JSON.parse(localStorage.getItem('candid-lens-all-users') || '[]');
+      allUsers.push(userData);
+      localStorage.setItem('candid-lens-all-users', JSON.stringify(allUsers));
+      setCurrentUser(userData);
       onClose();
     }
   };
@@ -60,7 +66,7 @@ const UserSetup = ({ isOpen, onClose }: UserSetupProps) => {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
-            <User className="w-5 h-5" />
+            <UserIcon className="w-5 h-5" />
             <span>Create Your Username</span>
           </DialogTitle>
         </DialogHeader>

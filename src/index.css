@@ -61,6 +61,10 @@
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', sans-serif;
     position: relative;
+    background-image: url('src/assets/fuji-sky.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
   }
 
   body::before {

@@ -6,6 +6,7 @@ import UploadModal from '@/components/UploadModal';
 import { Button } from '@/components/ui/button';
 import { Upload, Calendar, Camera, TrendingUp, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Navigation from '@/components/Navigation';
 
 const Trending = () => {
   const { getTrendingPhotos } = usePhotos();
@@ -101,6 +102,8 @@ const Trending = () => {
         isOpen={isUploadOpen} 
         onClose={() => setIsUploadOpen(false)} 
       />
+      
+      <Navigation />
     </div>
   );
 };

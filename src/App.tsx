@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Trending from "./pages/Trending";
 import Profile from "./pages/Profile";
 import Groups from "./pages/Groups";
+import Global from "./pages/Global";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/trending" element={<Trending />} />
               <Route path="/groups" element={<Groups />} />
+              <Route path="/global" element={<Global />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -6,6 +6,7 @@ import UploadModal from '@/components/UploadModal';
 import { Button } from '@/components/ui/button';
 import { Upload, Calendar, Camera, ArrowLeft, User, Settings, Moon, Sun, Share, CheckCircle, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Navigation from '@/components/Navigation';
 
 const Profile = () => {
   const { getUserPhotos } = usePhotos();
@@ -160,6 +161,8 @@ const Profile = () => {
         isOpen={isUploadOpen} 
         onClose={() => setIsUploadOpen(false)} 
       />
+      
+      <Navigation />
     </div>
   );
 };

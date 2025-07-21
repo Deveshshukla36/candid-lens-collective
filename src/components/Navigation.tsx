@@ -1,66 +1,38 @@
-
 import { Link, useLocation } from 'react-router-dom';
-import { Home, TrendingUp, User, Plus } from 'lucide-react';
+import { Camera, TrendingUp, Users, Globe, User } from 'lucide-react';
 
-const Navigation = ({ onUploadClick }: { onUploadClick?: () => void }) => {
+const Navigation = () => {
   const location = useLocation();
-  
-  const isActive = (path: string) => location.pathname === path;
-  
+
+  const navItems = [
+    { path: '/', icon: Camera, label: 'Photos' },
+    { path: '/trending', icon: TrendingUp, label: 'Trending' },
+    { path: '/global', icon: Globe, label: 'Global' },
+    { path: '/groups', icon: Users, label: 'Groups' },
+    { path: '/profile', icon: User, label: 'Profile' },
+  ];
+
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link to="/" className="font-rough text-2xl">
-            <span className="text-white">PhotoShare</span>
-          </Link>
-          
-          <div className="flex items-center space-x-8">
-            <Link 
-              to="/" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                isActive('/') 
-                  ? 'bg-white/20 text-white' 
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <Home size={20} />
-              <span className="font-medium">Gallery</span>
-            </Link>
-            
-            <Link 
-              to="/trending" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                isActive('/trending') 
-                  ? 'bg-white/20 text-white' 
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <TrendingUp size={20} />
-              <span className="font-medium">Trending</span>
-            </Link>
-            
-            <Link 
-              to="/profile" 
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                isActive('/profile') 
-                  ? 'bg-white/20 text-white' 
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <User size={20} />
-              <span className="font-medium">Profile</span>
-            </Link>
-            
-            {onUploadClick && (
-              <button
-                onClick={onUploadClick}
-                className="p-2 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-all duration-200"
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 z-50">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="flex justify-around py-2">
+          {navItems.map(({ path, icon: Icon, label }) => {
+            const isActive = location.pathname === path;
+            return (
+              <Link
+                key={path}
+                to={path}
+                className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+                  isActive 
+                    ? 'text-black' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
               >
-                <Plus size={20} />
-              </button>
-            )}
-          </div>
+                <Icon className={`w-6 h-6 ${isActive ? 'stroke-2' : 'stroke-1'}`} />
+                <span className="text-xs mt-1 font-medium">{label}</span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </nav>

@@ -41,7 +41,9 @@ export const usePhotos = () => {
 };
 
 export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [photos, setPhotos] = useState<PhotoData[]>([
+  const [photos, setPhotos] = useState<PhotoData[]>(() => {
+    const savedPhotos = localStorage.getItem('candid-lens-photos');
+    return savedPhotos ? JSON.parse(savedPhotos) : [
     {
       id: '1',
       url: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=800&h=600&fit=crop',
@@ -162,7 +164,13 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       uploadDate: '2024-01-08',
       isGlobal: true
     }
-  ]);
+  ];
+  });
+
+  // Save photos to localStorage whenever photos change
+  React.useEffect(() => {
+    localStorage.setItem('candid-lens-photos', JSON.stringify(photos));
+  }, [photos]);
 
   const addPhoto = (photoData: Omit<PhotoData, 'id' | 'likes' | 'isLiked' | 'uploadDate'>) => {
     const newPhoto: PhotoData = {
@@ -203,9 +211,18 @@ export const PhotoProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const getTrendingPhotos = () => {
-    return photos
-      .filter(photo => photo.isGlobal)
-      .sort((a, b) => b.likes - a.likes);
+    const globalPhotos = photos.filter(photo => photo.isGlobal);
+    return globalPhotos.sort((a, b) => {
+      // Admin photos (Devesh) always come first
+      const aIsAdmin = a.uploadedBy === 'Devesh';
+      const bIsAdmin = b.uploadedBy === 'Devesh';
+      
+      if (aIsAdmin && !bIsAdmin) return -1;
+      if (!aIsAdmin && bIsAdmin) return 1;
+      
+      // Then sort by likes (highest first)
+      return b.likes - a.likes;
+    });
   };
 
   const getUserPhotos = (username: string) => {

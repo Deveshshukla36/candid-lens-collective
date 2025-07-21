@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-interface User {
+export interface User {
   username: string;
   password: string;
   joinedDate: string;
@@ -231,7 +231,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
     
     if (userData) {
-      setCurrentUser(userData);
+      // Mark admin status for Devesh
+      const userWithAdmin = { 
+        ...userData, 
+        isAdmin: userData.username === 'Devesh' 
+      };
+      setCurrentUser(userWithAdmin);
       return true;
     }
     return false;
