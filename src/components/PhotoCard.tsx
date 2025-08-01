@@ -58,7 +58,7 @@ const PhotoCard = ({ photo, showUserInfo = false }: PhotoCardProps) => {
   return (
     <>
       <div 
-        className="aspect-square cursor-pointer group overflow-hidden bg-gray-100 relative"
+        className="aspect-square cursor-pointer group overflow-hidden bg-muted relative hover:opacity-95 transition-opacity duration-200"
         onClick={handleDoubleTap}
       >
         <img 

@@ -33,23 +33,23 @@ const Trending = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border/50 bg-background/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 sm:space-x-6">
-              <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
+              <Link to="/" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
                 <ArrowLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Back</span>
+                <span className="hidden sm:inline font-medium">Back</span>
               </Link>
               <div className="flex items-center space-x-2">
-                <TrendingUp className="w-5 h-5 text-gray-900" />
-                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
-                  TRENDING
+                <TrendingUp className="w-5 h-5 text-foreground" />
+                <h1 className="text-lg sm:text-xl font-light tracking-tight text-foreground">
+                  Trending
                 </h1>
               </div>
-              <div className="flex items-center space-x-2 sm:space-x-4 text-sm text-gray-600">
+              <div className="flex items-center space-x-2 sm:space-x-4 text-sm text-muted-foreground">
                 <div className="flex items-center space-x-1">
                   <Camera className="w-4 h-4" />
                   <span className="hidden sm:inline">{trendingPhotos.length} Photos</span>
@@ -66,7 +66,7 @@ const Trending = () => {
             <Button 
               onClick={() => setIsUploadOpen(true)}
               size="sm"
-              className="bg-black hover:bg-gray-800 text-white"
+              className="clean-button"
             >
               <Upload className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Upload</span>
@@ -79,11 +79,11 @@ const Trending = () => {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {trendingPhotos.length === 0 ? (
           <div className="text-center py-20">
-            <TrendingUp className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-            <p className="text-gray-500 text-lg mb-6">No trending photos yet</p>
+            <TrendingUp className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground text-lg mb-6">No trending photos yet</p>
             <Button 
               onClick={() => setIsUploadOpen(true)}
-              className="bg-black hover:bg-gray-800 text-white"
+              className="clean-button"
             >
               <Upload className="w-4 h-4 mr-2" />
               Upload a photo

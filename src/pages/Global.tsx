@@ -147,22 +147,21 @@ const Global = () => {
   const isAdmin = (username: string) => username === 'Devesh';
 
   return (
-    <div className="min-h-screen bg-white/95 backdrop-blur-sm">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-2xl mx-auto px-4 py-4">
+      <header className="border-b border-border/50 bg-background/95 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
+              <Link to="/" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
                 <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
+                <span className="font-medium">Back</span>
               </Link>
-              <h1 className="text-xl font-semibold text-gray-900">Global</h1>
+              <h1 className="text-xl font-light text-foreground">Global Feed</h1>
             </div>
             <Button 
               onClick={() => setIsCreating(true)}
-              size="sm"
-              className="bg-black hover:bg-gray-800 text-white"
+              className="clean-button px-4 py-2 text-sm font-medium"
             >
               Create Post
             </Button>
@@ -171,8 +170,7 @@ const Global = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-2xl mx-auto px-4 py-6">
-        {/* Create Post Modal */}
+      <main className="max-w-4xl mx-auto px-4 py-6">{/* Create Post Modal */}
         {isCreating && (
           <Card className="mb-6 border shadow-sm">
             <CardContent className="p-4">
