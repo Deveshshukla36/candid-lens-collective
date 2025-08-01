@@ -47,7 +47,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Load user and groups from localStorage
-    const savedUser = localStorage.getItem('candid-lens-user');
+    const savedUser = localStorage.getItem('candid-lens-user') || localStorage.getItem('candid-lens-current-session');
     const savedGroups = localStorage.getItem('candid-lens-groups');
     
     if (savedUser) {
@@ -237,6 +237,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin: userData.username === 'Devesh' 
       };
       setCurrentUser(userWithAdmin);
+      // Persist login session
+      localStorage.setItem('candid-lens-current-session', JSON.stringify(userWithAdmin));
       return true;
     }
     return false;

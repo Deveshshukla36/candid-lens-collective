@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePhotos } from '@/context/PhotoContext';
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
@@ -6,8 +6,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
-import { Heart, MessageCircle, Share, MoreHorizontal, Image, Link2, Gift, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Heart, MessageCircle, Share, MoreHorizontal, Image, Link2, Gift, ArrowLeft, CheckCircle, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface GlobalPost {
   id: string;
@@ -23,25 +24,43 @@ interface GlobalPost {
 
 const Global = () => {
   const { currentUser } = useUser();
-  const [posts, setPosts] = useState<GlobalPost[]>([
-    {
-      id: '1',
-      type: 'image',
-      content: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=800&h=600&fit=crop',
-      caption: 'Simple as that 😊',
-      author: 'the.successpreneur',
-      timestamp: '14h',
-      likes: 24,
-      isLiked: false,
-      comments: 2
-    }
-  ]);
+  const { toast } = useToast();
+  const [posts, setPosts] = useState<GlobalPost[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [newPost, setNewPost] = useState({
     type: 'text' as 'image' | 'link' | 'text',
     content: '',
     caption: ''
   });
+
+  // Load posts from localStorage on mount
+  useEffect(() => {
+    const savedPosts = localStorage.getItem('candid-lens-global-posts');
+    if (savedPosts) {
+      setPosts(JSON.parse(savedPosts));
+    } else {
+      // Default posts
+      const defaultPosts: GlobalPost[] = [
+        {
+          id: '1',
+          type: 'image',
+          content: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=800&h=600&fit=crop',
+          caption: 'Simple as that 😊',
+          author: 'the.successpreneur',
+          timestamp: '14h',
+          likes: 24,
+          isLiked: false,
+          comments: 2
+        }
+      ];
+      setPosts(defaultPosts);
+    }
+  }, []);
+
+  // Save posts to localStorage whenever posts change
+  useEffect(() => {
+    localStorage.setItem('candid-lens-global-posts', JSON.stringify(posts));
+  }, [posts]);
 
   const handleCreatePost = () => {
     if (!currentUser || !newPost.caption.trim()) return;
@@ -185,11 +204,40 @@ const Global = () => {
                 </div>
 
                 {newPost.type === 'image' && (
-                  <Input
-                    placeholder="Image URL"
-                    value={newPost.content}
-                    onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
-                  />
+                  <div className="space-y-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            setNewPost(prev => ({ ...prev, content: event.target?.result as string }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label htmlFor="image-upload" className="flex items-center space-x-2 p-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors">
+                      <Upload className="w-5 h-5 text-gray-500" />
+                      <span className="text-gray-600">Upload Image from Gallery</span>
+                    </label>
+                    {newPost.content && (
+                      <div className="relative">
+                        <img src={newPost.content} alt="Preview" className="w-full h-40 object-cover rounded-lg" />
+                        <Button
+                          onClick={() => setNewPost(prev => ({ ...prev, content: '' }))}
+                          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 h-6 w-6"
+                          size="sm"
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {newPost.type === 'link' && (
@@ -273,13 +321,23 @@ const Global = () => {
                         <Heart className={`w-5 h-5 ${post.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
                         <span className="text-sm">{post.likes}</span>
                       </button>
-                      <button className="flex items-center space-x-1 text-gray-600 hover:text-blue-500 transition-colors">
+                      <button 
+                        onClick={() => toast({ title: "Comments feature coming soon!" })}
+                        className="flex items-center space-x-1 text-gray-600 hover:text-blue-500 transition-colors"
+                      >
                         <MessageCircle className="w-5 h-5" />
                         <span className="text-sm">{post.comments}</span>
                       </button>
-                      <button className="flex items-center space-x-1 text-gray-600 hover:text-green-500 transition-colors">
+                      <button 
+                        onClick={() => {
+                          navigator.share ? 
+                            navigator.share({ title: `Check out this post by @${post.author}`, text: post.caption, url: window.location.href }) :
+                            navigator.clipboard.writeText(window.location.href).then(() => toast({ title: "Link copied to clipboard!" }))
+                        }}
+                        className="flex items-center space-x-1 text-gray-600 hover:text-green-500 transition-colors"
+                      >
                         <Share className="w-5 h-5" />
-                        <span className="text-sm">1</span>
+                        <span className="text-sm">Share</span>
                       </button>
                     </div>
                   </div>
