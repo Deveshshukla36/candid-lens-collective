@@ -58,15 +58,16 @@ const PhotoCard = ({ photo, showUserInfo = false }: PhotoCardProps) => {
   return (
     <>
       <div 
-        className="aspect-square cursor-pointer group overflow-hidden bg-muted relative hover:opacity-95 transition-opacity duration-200"
+        className="aspect-square cursor-pointer group overflow-hidden bg-muted relative hover:shadow-xl hover:shadow-black/10 transition-all duration-300 animate-fade-in hover:scale-[1.02] active:scale-[0.98]"
         onClick={handleDoubleTap}
       >
         <img 
           src={photo.url} 
           alt={photo.title}
-          className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-105"
           loading="lazy"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         {renderUserInfo()}
       </div>
 

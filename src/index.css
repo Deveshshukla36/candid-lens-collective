@@ -89,14 +89,26 @@
   }
 
   .clean-card {
-    @apply bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg shadow-sm;
+    @apply bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg shadow-sm hover:shadow-md hover:bg-card/90 transition-all duration-300;
   }
 
   .clean-button {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors duration-200;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-all duration-200 hover:scale-105 active:scale-95;
   }
 
   .text-subtle {
     @apply text-muted-foreground text-sm;
+  }
+
+  .smooth-enter {
+    animation: fade-in 0.4s ease-out, slide-up 0.5s ease-out;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:scale-105 hover:shadow-lg;
+  }
+
+  .gentle-glow {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
   }
 }
