@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/a6bc4fef-f7a2-445d-aa8c-bcbe3f3b79e3
+**URL**: https://candid-lens-collective.lovable.app/
 
 ## How can I edit this code?
 
